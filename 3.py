@@ -42,7 +42,7 @@ def calibrate_emg(ser_local):
     calibrated = True
 
 def readCom():
-    global ser, xk, yk, xf, yf, eMin, eSr, eMax, eCount, vMin, vSr, vMax, vCount, pulseNorm, allCon, f, c
+    global ser, xk, yk, xf, yf, eMin, eSr, eMax, eCount, vMin, vSr, vMax, vCount, pulseNorm, allCon
     while running:
         wp = 0
         for i in range(1, 30):
@@ -308,4 +308,5 @@ try:
     ser.close()
 except:
     pass
+
 
