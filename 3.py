@@ -36,26 +36,20 @@ def calibrate_emg(ser_local):
 
     vals = sorted(set(calibration_data))
     idx = int(len(vals) * 0.6)
-#    if idx >= len(vals):
-#        idx = len(vals) - 1
-
     emg_threshold = vals[idx]
     print("Калибровка завершена, порог =", emg_threshold)
 
     calibrated = True
 
 def readCom():
-    global ser, xk, yk, xf, yf, eMin, eSr, eMax, eCount, vMin, vSr, vMax, vCount, pulseNorm, allCon, calibration_data, calibrating, emg_threshold
+    global ser, xk, yk, xf, yf, eMin, eSr, eMax, eCount, vMin, vSr, vMax, vCount, pulseNorm, allCon, f, c
     while running:
         wp = 0
         for i in range(1, 30):
             try:
                 ser = Serial(f"COM{i}", baudrate=38400)
-                print("Подключено...")
-                calibrate_emg(ser)
                 allCon = True
                 c, oldState = 0, 0
-                # sleep(3)
                 ekg_conn.configure(text="Пульс определен, перейдите к подключению\nэлектродов для исследования ЭМГ")
                 emg_conn.configure(text="Электроды подключены, для перехода в форму\nисследования необходимо сжать мышцу руки")
                 while running:
@@ -71,7 +65,17 @@ def readCom():
                                 oldState = 1
                                 c += 1
                                 if c == 6:
-                                    puls2.configure(text="Исследование закончено\nпереход к блоку видео")
+                                    puls2.config(text="Исследование закончено,\nпереход к блоку видео")
+                                    oldState = 1
+                                    pause()
+                                    c += 1
+                                elif c > 6:
+                                    pause()
+                                    if vPlaying:
+                                        puls2.config(text="Запуск программы")
+                                    else:
+                                        puls2.config(text="Стоп программы")
+
                         yk.append((s[1] - 32) / 16)
                         yk.pop(0)
                         xk.append(xk[-1] + 0.05)
@@ -102,6 +106,8 @@ def readCom():
                         elif vAmp > vMax:
                             vMax = vAmp
                         stats2.configure(text=f"Минимальные значения ЭМГ:{vMin}\nСредние значения ЭМГ:{int(vSr / vCount)}\nМаксимальные значения ЭМГ:{vMax}")
+                        s[4] = s[4] - 140
+                        s[5] = s[5] - 60
                         yf = [i / 20 for i in s[4:]]
                         ax1.cla()
                         ax1.set_ylim(-3, 3)
@@ -167,12 +173,10 @@ Label(form1, text="Выполнить подклчение электродов\
 emg_conn = Label(form1, text="Сигнал не определен,  проверьте подключение", font=zhir)
 emg_conn.place(x=20, y=580)
 
-'''
 Label(form1, text="Выполнить подключение электродов\nдля исследования ЭКГ согласно примеру:", font=zhir).place(x=20, y=210)
 Label(form1, text="Пульс определен, перейдите к подключению\nэлектродов для исследования ЭМГ", font=zhir).place(x=20, y=330)
 Label(form1, text="Выполнить подклчение электродов\nдля исследования ЭМГ согласно примеру:", font=zhir).place(x=20, y=470)
 Label(form1, text="Электроды подключены, для перехода в форму\nисследования нажмите Далее", font=zhir).place(x=20, y=580)
-'''
 
 # Button(form1, text="Далее", font=big, command=sw).place(x=15, y=665)
 
@@ -213,6 +217,7 @@ def pause():
         puls2.config(text="Запуск программы")
     else:
         puls2.config(text="Стоп программы")
+
 
 class VideoPlayer:
     def __init__(self, file):
