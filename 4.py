@@ -48,7 +48,7 @@ def readCom():
         for i in range(1, 30):
             try:
                 ser = Serial(f"COM{i}", baudrate=38400)
-                calibrate_emg(ser_local)
+                calibrate_emg(ser)
                 allCon = True
                 # c — счётчик сжатий в форме 2
                 # form1_state — для детектирования сжатия ещё в форме 1
