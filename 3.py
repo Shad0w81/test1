@@ -48,6 +48,7 @@ def readCom():
         for i in range(1, 30):
             try:
                 ser = Serial(f"COM{i}", baudrate=38400)
+                calibrate_emg(ser)
                 allCon = True
                 c, oldState = 0, 0
                 ekg_conn.configure(text="Пульс определен, перейдите к подключению\nэлектродов для исследования ЭМГ")
@@ -307,3 +308,4 @@ try:
     ser.close()
 except:
     pass
+
